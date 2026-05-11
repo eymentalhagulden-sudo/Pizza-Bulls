@@ -1,1 +1,207 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>cr0sz_OPERATOR_v2126</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --mc-green: #3fb11a;
+            --mc-blue: #00aaaa;
+            --cyber-purple: #bc00ff;
+            --bg-dark: #050505;
+        }
 
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: var(--bg-dark);
+            color: white;
+            font-family: 'Press Start 2P', cursive; /* Minecraft yazı tipi */
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* Arka planda süzülen blok parçacıkları */
+        #particles {
+            position: fixed; width: 100%; height: 100%;
+            z-index: -1;
+            background: linear-gradient(180deg, #0f0f1a 0%, #050505 100%);
+        }
+
+        .viewport {
+            width: 100vw; height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            perspective: 1200px;
+        }
+
+        /* Ana Oyuncu Kartı */
+        .player-card {
+            position: relative;
+            width: 85%; max-width: 380px;
+            background: rgba(20, 20, 30, 0.8);
+            border: 4px solid var(--mc-green);
+            box-shadow: 0 0 25px var(--mc-green), inset 0 0 15px rgba(63, 177, 26, 0.4);
+            padding: 30px 20px;
+            border-radius: 5px;
+            transform-style: preserve-3d;
+            text-align: center;
+            transition: transform 0.1s ease-out;
+        }
+
+        .pixel-corners {
+            position: absolute; width: 10px; height: 10px; background: var(--mc-green);
+        }
+        .tl { top: -4px; left: -4px; }
+        .br { bottom: -4px; right: -4px; }
+
+        h1 {
+            font-size: 18px; color: var(--mc-blue);
+            margin-bottom: 25px;
+            text-shadow: 4px 4px #003333;
+            transform: translateZ(50px);
+        }
+
+        .stat-box {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #555;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 10px;
+            text-align: left;
+            line-height: 2;
+            transform: translateZ(30px);
+        }
+
+        .stat-val { color: var(--mc-green); float: right; }
+
+        /* XP Bar Animasyonu */
+        .xp-container {
+            width: 100%; height: 12px;
+            background: #333;
+            border: 2px solid #000;
+            margin-top: 20px;
+            transform: translateZ(40px);
+        }
+        .xp-fill {
+            width: 0%; height: 100%;
+            background: var(--mc-green);
+            box-shadow: 0 0 10px var(--mc-green);
+            animation: xp-load 3s ease-out forwards;
+        }
+
+        @keyframes xp-load { to { width: 85%; } }
+
+        .btn-action {
+            margin-top: 30px;
+            padding: 15px;
+            width: 100%;
+            background: #777;
+            border: none;
+            border-bottom: 4px solid #333;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            cursor: pointer;
+            transform: translateZ(60px);
+        }
+
+        .btn-action:active { border-bottom: 0; transform: translateZ(60px) translateY(4px); }
+
+        /* Gizli Başarı Pop-up */
+        #achievement {
+            position: fixed; top: 20px; right: -400px;
+            width: 300px; background: #222;
+            border: 3px solid #555;
+            display: flex; align-items: center;
+            padding: 10px; transition: 0.5s;
+            z-index: 1000;
+        }
+
+        .ach-icon { width: 40px; height: 40px; background: var(--mc-green); margin-right: 15px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="particles"></div>
+
+    <div id="achievement">
+        <div class="ach-icon"></div>
+        <div style="font-size: 8px;">
+            <div style="color: yellow;">BAŞARI KAZANILDI!</div>
+            <div style="color: white;">Best MC Partner</div>
+        </div>
+    </div>
+
+    <div class="viewport">
+        <div class="player-card" id="card">
+            <div class="pixel-corners tl"></div>
+            <div class="pixel-corners br"></div>
+            
+            <p style="font-size: 7px; color: #555; letter-spacing: 2px;">SERVER_ACCESS: GRANTED</p>
+            <h1>PLAYER: cr0sz</h1>
+
+            <div class="stat-box">
+                <div>DURUM: <span class="stat-val">ONLINE</span></div>
+                <div>YETKİ: <span class="stat-val">OPERATOR</span></div>
+                <div>SKILL: <span class="stat-val">MAX LEVEL</span></div>
+            </div>
+
+            <div class="xp-container">
+                <div class="xp-fill"></div>
+            </div>
+            <p style="font-size: 8px; color: var(--mc-green); margin-top: 5px;">LVL: 2126</p>
+
+            <button class="btn-action" onclick="showSecret()">SİSTEMİ TETİKLE</button>
+        </div>
+    </div>
+
+    <audio id="mc-sound">
+        <source src="https://www.myinstants.com/media/sounds/minecraft-level-up.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const card = document.getElementById('card');
+
+        // Mobil Jiroskop (iPhone için sağa sola eğme)
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener('deviceorientation', (e) => {
+                let rY = Math.min(Math.max(e.gamma / 2, -15), 15);
+                let rX = Math.min(Math.max((e.beta - 45) / 2, -15), 15);
+                card.style.transform = `rotateY(${rY}deg) rotateX(${-rX}deg)`;
+            });
+        }
+
+        // Başarı Mesajını Göster
+        function showSecret() {
+            document.getElementById('mc-sound').play();
+            const ach = document.getElementById('achievement');
+            ach.style.right = '20px';
+            
+            setTimeout(() => {
+                ach.style.right = '-400px';
+            }, 4000);
+
+            // Ekrana rastgele bloklar yağdır
+            for(let i=0; i<20; i++) {
+                let b = document.createElement('div');
+                b.style.position = 'fixed';
+                b.style.width = '20px';
+                b.style.height = '20px';
+                b.style.background = i % 2 == 0 ? '#3fb11a' : '#8B4513';
+                b.style.left = Math.random() * 100 + 'vw';
+                b.style.top = '-50px';
+                b.style.zIndex = '2000';
+                b.style.transition = '3s';
+                document.body.appendChild(b);
+                
+                setTimeout(() => {
+                    b.style.top = '120vh';
+                    b.style.transform = `rotate(${Math.random() * 360}deg)`;
+                }, 100);
+            }
+        }
+    </script>
+</body>
+</html>
